@@ -118,7 +118,11 @@ func draw_dungeon(g) -> void:
 			if g.on_screen(h.pos):
 				var world = g.visuals.position(g.visuals.key(h,true),Vector2(h.pos))
 				var at = (g.MAP.position+(world-Vector2(g.camera))*g.TILE).round()
-				var marker_y = 1 - 32 * maxf(0,float(art.entries.get(h.kind,{}).get("scale",1))-1)
+				var direction = "up" if h.heading.y<0 else ("left" if h.heading.x<0 else ("right" if h.heading.x>0 else "down"))
+				var motion = h.motion+"_"+direction if h.motion in ["move","attack"] else h.motion
+				var pose = g.visuals.poses.get(g.visuals.key(h,true),{})
+				var clock = h.motion_time+clampf(g.visuals.clock-float(pose.get("last_tick_clock",g.visuals.clock)),0,0.1)
+				var marker_y = 1 - 32 * maxf(0,art.scale_for(h.kind,motion,clock)-1)
 				g.draw_colored_polygon(PackedVector2Array([at+Vector2(15,marker_y),at+Vector2(25,marker_y),at+Vector2(20,marker_y+5)]),g.RED)
 				if h.id == g.sim.carrier:
 					g.draw_rect(Rect2(at+Vector2(1,1),Vector2(38,38)),g.RED,false,2)

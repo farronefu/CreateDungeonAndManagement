@@ -88,6 +88,12 @@ func run() -> void:
 	check(snapshot==g.sim.snapshot(),"pause freezes hero animation state")
 	var clips=g.presentation.art.entries.knight.animations
 	check(clips.look.row==4 and clips.death.frames==5 and clips.celebrate.frames==7,"sheet rows and nonempty frame counts")
+	var art=g.presentation.art
+	check(art.clip_textures[clips.attack_down.texture].get_size()==Vector2(256,128),"separate attack sheet loaded")
+	check(clips.attack_down.row==0 and clips.attack_up.row==1 and clips.attack_left.row==2 and clips.attack_right.row==3,"attack sheet direction rows")
+	check(is_equal_approx(art.scale_for("knight","attack_down",0),1.5),"attack begins at normal scale")
+	check(is_equal_approx(art.scale_for("knight","attack_down",4.0/14),2.0),"attack contact reaches larger scale")
+	check(is_equal_approx(art.scale_for("knight","attack_down",1),1.5),"attack recovers normal scale")
 	g.queue_free()
 	await process_frame
 	print("HERO RESULT %d checks %d failures"%[checks,failures])

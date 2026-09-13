@@ -63,28 +63,36 @@
         "loop": false
       },
       "attack_down": {
-        "row": 5,
+        "row": 0,
         "frames": 8,
         "fps": 14,
-        "loop": false
+        "loop": false,
+        "texture": "res://assets/characters/hero-attack-4directions.png",
+        "scale": 2
       },
       "attack_up": {
-        "row": 6,
+        "row": 1,
         "frames": 8,
         "fps": 14,
-        "loop": false
+        "loop": false,
+        "texture": "res://assets/characters/hero-attack-4directions.png",
+        "scale": 2
       },
       "attack_left": {
-        "row": 7,
+        "row": 2,
         "frames": 8,
         "fps": 14,
-        "loop": false
+        "loop": false,
+        "texture": "res://assets/characters/hero-attack-4directions.png",
+        "scale": 2
       },
       "attack_right": {
-        "row": 8,
+        "row": 3,
         "frames": 8,
         "fps": 14,
-        "loop": false
+        "loop": false,
+        "texture": "res://assets/characters/hero-attack-4directions.png",
+        "scale": 2
       },
       "death": {
         "row": 9,

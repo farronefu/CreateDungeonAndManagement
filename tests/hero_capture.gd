@@ -5,6 +5,8 @@ var folder = "res://docs/images/v04/"
 var sheet: Image
 var index = 0
 func _initialize() -> void:
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--captures="): folder=arg.trim_prefix("--captures=").trim_suffix("/")+"/"
 	call_deferred("run")
 func capture(name: String, full: bool = false):
 	g.queue_redraw()
@@ -13,7 +15,7 @@ func capture(name: String, full: bool = false):
 	var im = root.get_texture().get_image()
 	if full: im.save_png(folder+name+".png")
 	var at = g.screen_pos(Vector2i(30,5))
-	var crop=im.get_region(Rect2i(Vector2i(at)-Vector2i(12,12),Vector2i(64,64)))
+	var crop=im.get_region(Rect2i(Vector2i(at)-Vector2i(28,28),Vector2i(96,96)))
 	crop.resize(192,192,Image.INTERPOLATE_NEAREST)
 	sheet.blit_rect(crop,Rect2i(0,0,192,192),Vector2i(index%6,index/6)*192)
 	index+=1
@@ -48,7 +50,7 @@ func run():
 		h.heading=d
 		h.motion="attack"
 		h.motion_time=0.32
-		await capture("attack")
+		await capture("attack_"+str(d),true)
 	for time in [0.3,0.65]:
 		h.motion="celebrate"
 		h.motion_time=time
