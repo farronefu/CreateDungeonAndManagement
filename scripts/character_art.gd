@@ -43,11 +43,13 @@ func draw(g, kind: String, feet: Vector2, clock: float, action: String = "idle",
 	if entries.has(kind):
 		var item = entries[kind]
 		texture = textures[kind]
-		var cell = Vector2(item.cell[0], item.cell[1])
+		var clip = clip_for(kind,action)
+		var cell_values = clip.get("cell",item.cell)
+		var anchor_values = clip.get("anchor",item.anchor)
+		var cell = Vector2(cell_values[0], cell_values[1])
 		var scale_value = scale_for(kind,action,clock)
 		size = cell * scale_value
-		anchor = Vector2(item.anchor[0], item.anchor[1]) * scale_value
-		var clip = clip_for(kind,action)
+		anchor = Vector2(anchor_values[0], anchor_values[1]) * scale_value
 		texture = clip_textures.get(str(clip.get("texture","")),texture)
 		var count = maxi(1, int(clip.get("frames", 1)))
 		var frame = maxi(0,int(clock * float(clip.get("fps", 5))))
