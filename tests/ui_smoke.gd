@@ -66,6 +66,7 @@ func run() -> void:
 	await create_timer(2.3).timeout
 	check(game.state == "placement", "arrival transitions to placement")
 	game.sim.cursor = Vector2i(30, 16)
+	game.center_camera(game.sim.cursor, false)
 	await capture("placement")
 	await tap(JOY_BUTTON_A)
 	check(game.state == "battle", "A confirms placement and starts battle")

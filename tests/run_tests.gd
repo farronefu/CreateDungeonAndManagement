@@ -95,6 +95,7 @@ func run() -> void:
 	check(s.outcome == "lost", "carrier reaching exit gives defeat")
 
 	var game = Game.new()
+	game.muted = true # Headless logic tests do not advance the audio mixer.
 	root.add_child(game)
 	game.set_process(false)
 	game.restart()
@@ -140,7 +141,15 @@ func run() -> void:
 	game.sim.heroes[1].pos = Vector2i(30, 5)
 	check(game.target_position() == Vector2i(30, 5), "LB prioritizes carrier")
 	game.center_camera(Vector2i(59, 39), true)
-	check(game.camera == Vector2i(32, 22), "camera clamps at lower right")
+	check(game.camera == Vector2i(36, 30), "camera clamps at lower right")
+	check(game.on_screen(Vector2i(59,39)), "last map cell remains visible")
+	check(game.screen_pos(Vector2i(59,39)) + Vector2(game.TILE,game.TILE) == game.MAP.end, "last cell fits above HUD without clipping")
+	check(not game.MAP.has_point(Vector2(500,100)), "surface scenery is outside playable tile rectangle")
+	game.sim = Sim.new(72)
+	game.center_camera(Vector2i(59,71), true)
+	check(game.camera == Vector2i(36,62) and game.on_screen(Vector2i(59,71)), "deepest 72-row map scrolls to final cell")
+	game.center_camera(Vector2i.ZERO, true)
+	check(game.camera == Vector2i.ZERO, "camera clamps at upper left")
 	game.sim.cursor = Vector2i.ZERO
 	game.move_cursor(Vector2i.LEFT)
 	check(game.sim.cursor == Vector2i.ZERO, "cursor clamps to map")
