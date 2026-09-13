@@ -94,6 +94,28 @@ func run() -> void:
 	check(is_equal_approx(art.scale_for("knight","attack_down",0),1.5),"attack begins at normal scale")
 	check(is_equal_approx(art.scale_for("knight","attack_down",4.0/14),1.5),"attack contact keeps normal scale")
 	check(is_equal_approx(art.scale_for("knight","attack_down",1),1.5),"attack recovers normal scale")
+	g.restart()
+	g.sim=room()
+	g.state="battle"
+	var walking=g.sim.heroes[0]
+	walking.motion_left=0
+	g.visuals.observe(g.sim)
+	g.sim.move_hero(walking,Vector2i(30,1))
+	g.visuals.observe(g.sim)
+	g.visuals.update(0.5)
+	check(is_equal_approx(g.visuals.position("h0",Vector2.ZERO).y,0.5),"hero travels half a cell in half a second")
+	g.visuals.update(0.5)
+	check(g.visuals.position("h0",Vector2.ZERO)==Vector2(30,1),"hero completes cell travel in one second")
+	check(clips.move_down.frames/float(clips.move_down.fps)==Sim.HERO_WALK_SECONDS,"one walk cycle matches one cell")
+	for target in ["hero","monarch"]:
+		g.view_target=target
+		g.camera=Vector2i(3,9)
+		var camera_before=g.camera
+		g.advance_time(0.2)
+		check(g.camera==camera_before,"world updates do not track "+target)
+	g.lb_next_hero=true
+	g.toggle_focus()
+	check(g.camera==Vector2i(18,0),"LB still jumps to hero on request")
 	g.queue_free()
 	await process_frame
 	print("HERO RESULT %d checks %d failures"%[checks,failures])

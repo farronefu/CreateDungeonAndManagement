@@ -66,7 +66,7 @@ func draw_surface(g) -> void:
 	var label = ""
 	match g.state:
 		"prepare": label = "到来まで %03d 秒   Y 早期呼出" % maxi(0,int(g.PREP_SECONDS-g.sim.elapsed))
-		"battle": label = "防衛中 %03d 秒   LB 追跡" % int(g.sim.battle_elapsed)
+		"battle": label = "防衛中 %03d 秒   LB 位置表示" % int(g.sim.battle_elapsed)
 		"placement": label = "主を配置   A 決定 / 時間停止"
 		"arrival": label = "侵入者が接近中…"
 		"paused": label = "一時停止"
@@ -212,9 +212,9 @@ func draw_hud(g) -> void:
 	if g.state == "placement":
 		hint = "十字 配置場所を選ぶ   A 配置して防衛開始   入口につながる通路へ配置できます（時間停止中）"
 	elif g.state == "battle" and g.sim.carrier >= 0:
-		hint = "捕縛！ LB で追跡。出口に到達する前に、運搬している勇者を倒して救出しよう。"
+		hint = "捕縛！ LB で位置表示。出口に到達する前に、運搬している勇者を倒して救出しよう。"
 	elif g.sim.power <= 0:
-		hint = "掘削力が尽きました。魔物の防衛を見守ろう。  LB 追跡   Menu 停止"
+		hint = "掘削力が尽きました。魔物の防衛を見守ろう。  LB 位置表示   Menu 停止"
 	g.text_at(hint,Vector2(14,594),11,g.INK)
 
 func draw_hero_remains(g, h: Dictionary) -> void:

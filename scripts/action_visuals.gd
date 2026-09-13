@@ -25,6 +25,8 @@ func observe(sim) -> void:
 			if not poses.has(id):
 				poses[id] = {"from":target,"to":target,"elapsed":1.0,"face":1,"action":"idle","until":0.0}
 			var pose = poses[id]
+			pose.move_duration = sim.HERO_WALK_SECONDS if group == sim.heroes else 0.18
+			pose.linear_walk = group == sim.heroes
 			if group == sim.heroes: pose.last_tick_clock = clock
 			if a.dead and not pose.has("death_age"):
 				pose.death_age = 0.0
@@ -51,8 +53,8 @@ func observe(sim) -> void:
 func position(id: String, fallback: Vector2) -> Vector2:
 	if not poses.has(id): return fallback
 	var pose = poses[id]
-	var t = clampf(pose.elapsed / 0.18, 0, 1)
-	return pose.from.lerp(pose.to, t * t * (3 - 2 * t))
+	var t = clampf(pose.elapsed / float(pose.get("move_duration",0.18)), 0, 1)
+	return pose.from.lerp(pose.to, t if pose.get("linear_walk",false) else t * t * (3 - 2 * t))
 
 func emit(type: String, pos: Vector2, direction: Vector2 = Vector2.ZERO) -> void:
 	if effects.size() >= 96: effects.pop_front()

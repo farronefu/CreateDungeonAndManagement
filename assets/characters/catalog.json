@@ -39,25 +39,25 @@
       "move_down": {
         "row": 0,
         "frames": 8,
-        "fps": 32,
+        "fps": 8,
         "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "move_up": {
         "row": 1,
         "frames": 8,
-        "fps": 32,
+        "fps": 8,
         "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "move_left": {
         "row": 2,
         "frames": 8,
-        "fps": 32,
+        "fps": 8,
         "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "move_right": {
         "row": 3,
         "frames": 8,
-        "fps": 32,
+        "fps": 8,
         "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "look": {

@@ -4,6 +4,7 @@ extends RefCounted
 const WIDTH = 60
 const MAX_HEIGHT = 72
 const STEP = 0.1
+const HERO_WALK_SECONDS = 1.0
 const MAX_CREATURES = 220
 const STATS = {
 	"sprout": {"hp": 24.0, "attack": 3.0, "period": 0.8, "power": 1},
@@ -233,6 +234,7 @@ func tick(dt: float, battle: bool) -> void:
 				continue
 			h.motion_time += dt
 			h.motion_left = maxf(0,h.motion_left-dt)
+			if h.motion_left < 0.00001: h.motion_left = 0
 			if h.has("pending_hit") and h.motion_time >= 4.0/14.0:
 				for target in creatures:
 					if target.id == h.pending_hit and not target.dead and distance(h.pos,target.pos)<=1:
@@ -348,7 +350,7 @@ func move_hero(h: Dictionary, destination: Vector2i) -> void:
 	h.heading = destination - h.pos
 	h.pos = destination
 	h.looked = Vector2i(-1,-1)
-	set_hero_motion(h,"move",0.25)
+	set_hero_motion(h,"move",HERO_WALK_SECONDS)
 
 func hero_attack(h: Dictionary, a: Dictionary) -> void:
 	var direction: Vector2i = a.pos-h.pos

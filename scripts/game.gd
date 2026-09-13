@@ -164,8 +164,6 @@ func advance_time(delta: float) -> void:
 	if not sim.events.is_empty():
 		play_sound("alert")
 		sim.events.clear()
-	if view_target != "cursor":
-		follow_target()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_echo():
@@ -272,11 +270,6 @@ func target_position() -> Vector2i:
 			if not h.dead:
 				return h.pos
 	return Vector2i(-1, -1)
-
-func follow_target() -> void:
-	var p = target_position()
-	if p.x >= 0:
-		center_camera(p, true)
 
 func center_camera(p: Vector2i, centered: bool) -> void:
 	if centered:
