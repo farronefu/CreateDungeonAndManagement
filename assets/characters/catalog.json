@@ -38,23 +38,27 @@
       },
       "move_down": {
         "row": 0,
-        "frames": 3,
-        "fps": 12
+        "frames": 8,
+        "fps": 32,
+        "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "move_up": {
         "row": 1,
-        "frames": 3,
-        "fps": 12
+        "frames": 8,
+        "fps": 32,
+        "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "move_left": {
         "row": 2,
-        "frames": 3,
-        "fps": 12
+        "frames": 8,
+        "fps": 32,
+        "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "move_right": {
         "row": 3,
-        "frames": 3,
-        "fps": 12
+        "frames": 8,
+        "fps": 32,
+        "texture": "res://assets/characters/hero-walk-4directions.png"
       },
       "look": {
         "row": 4,
