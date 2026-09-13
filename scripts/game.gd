@@ -5,6 +5,9 @@ const FONT = preload("res://assets/NotoSansJP.otf")
 const ACTORS = preload("res://assets/actors-v2.png")
 const View = preload("res://scripts/garden_view.gd")
 var presentation = View.new()
+const Visuals = preload("res://scripts/action_visuals.gd")
+var visuals = Visuals.new()
+var result_elapsed: float = 0
 const TILE = 40
 const VISIBLE = Vector2i(24, 10)
 const MAP = Rect2(0, 136, 960, 400)
@@ -99,11 +102,17 @@ func restart() -> void:
 	lb_next_hero = true
 	held_direction = Vector2i.ZERO
 	particles.clear()
+	visuals.reset()
+	result_elapsed = 0
 	play_sound("confirm")
 
 func _process(delta: float) -> void:
 	if state in RUNNING_STATES:
 		animation += delta
+		visuals.update(delta)
+	elif state in ["won", "lost"]:
+		result_elapsed += delta
+		if result_elapsed < 0.8: visuals.update(delta)
 	if state == "arrival":
 		state_timer += delta
 	if state == "arrival" and state_timer >= 2.2:
@@ -139,11 +148,13 @@ func advance_time(delta: float) -> void:
 	while accumulator >= Sim.STEP:
 		accumulator -= Sim.STEP
 		sim.tick(Sim.STEP, state == "battle")
+		visuals.observe(sim)
 		if state == "prepare" and sim.elapsed >= PREP_SECONDS:
 			arrive()
 			break
 		if not sim.outcome.is_empty():
 			state = sim.outcome
+			result_elapsed = 0
 			play_sound("win" if state == "won" else "alert")
 			break
 	if not sim.events.is_empty():
@@ -176,6 +187,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				3: get_tree().quit()
 		return
 	if state == "title" or state in ["won", "lost"]:
+		if state in ["won", "lost"] and result_elapsed < 0.8:
+			return
 		if event.is_action_pressed("confirm"):
 			restart()
 		return
@@ -226,8 +239,8 @@ func move_cursor(direction: Vector2i) -> void:
 func try_dig() -> void:
 	if sim.dig(sim.cursor):
 		play_sound("dig")
-		for i in range(5):
-			particles.append({"pos": Vector2(sim.cursor * TILE + Vector2i(20, 20)), "velocity": Vector2(randf_range(-32, 32), randf_range(-45, 15)), "life": 0.3})
+		visuals.emit("dig", Vector2(sim.cursor))
+		visuals.observe(sim)
 	elif sim.power == 0:
 		sim.notice = "掘削力が尽きた。生態系の防衛を見守ろう。"
 
@@ -287,7 +300,7 @@ func _draw() -> void:
 	if state == "title": draw_title()
 	elif state == "paused": draw_pause()
 	elif state == "arrival": draw_arrival()
-	elif state in ["won", "lost"]: draw_result()
+	elif state in ["won", "lost"] and result_elapsed >= 0.8: draw_result()
 
 func screen_pos(p: Vector2i) -> Vector2:
 	return MAP.position + Vector2((p - camera) * TILE)
@@ -312,7 +325,7 @@ func draw_title() -> void:
 	text_at("光る土から生き物が生まれ、捕食で強い守りが育ちます。", Vector2(169, 305), 14, MUTED)
 	text_at("主を奥へ配置し、連れ去られたら出口までに救出しましょう。", Vector2(169, 332), 14, MUTED)
 	for i in range(3):
-		draw_texture_rect_region(ACTORS, Rect2(625 + i * 50, 148, 48, 48), Rect2(i * 20, 0, 20, 20))
+		presentation.art.draw(self, KINDS[i], Vector2(648+i*50,190), animation)
 	text_at("十字キー  移動     X  掘削     LB  視点切替", Vector2(169, 383), 15)
 	text_at("X を押しながら十字キーで連続掘り", Vector2(169, 411), 13, GOLD)
 	draw_rect(Rect2(168, 443, 282, 43), Color("25463f"))
@@ -330,10 +343,16 @@ func draw_pause() -> void:
 	text_at("十字 選択    A 決定    B 戻る", Vector2(310, 451), 12, MUTED)
 
 func draw_arrival() -> void:
-	overlay(Rect2(210, 200, 540, 180))
-	text_at("侵入者が、庭の入口に。", Vector2(260, 260), 27, GOLD)
-	text_at("鉄の測量士 ＋ 灯の修道士", Vector2(260, 305), 18)
-	text_at("このあと、主を守る場所を選びます。", Vector2(260, 344), 14, MUTED)
+	var slide = clampf(state_timer / 0.25, 0, 1)
+	var y = lerpf(270, 222, slide)
+	draw_rect(Rect2(0,y,960,132),Color(0.07,0.09,0.11,0.94))
+	draw_rect(Rect2(0,y,960,2),RED)
+	draw_rect(Rect2(0,y+130,960,2),GOLD)
+	presentation.art.draw(self,"knight",Vector2(258,y+93),state_timer,"move")
+	presentation.art.draw(self,"healer",Vector2(308,y+93),state_timer,"move")
+	text_at("侵入者、到来。",Vector2(363,y+53),29,GOLD)
+	text_at("鉄の測量士 ＋ 灯の修道士",Vector2(363,y+84),16)
+	text_at("このあと、主を守る場所を選びます。",Vector2(363,y+111),12,MUTED)
 
 func draw_result() -> void:
 	overlay(Rect2(215, 120, 530, 360))

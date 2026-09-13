@@ -4,6 +4,8 @@ extends RefCounted
 const SURFACE = preload("res://assets/surface-v2.png")
 const TERRAIN = preload("res://assets/terrain-v2.png")
 const ACTORS = preload("res://assets/actors-v2.png")
+const Art = preload("res://scripts/character_art.gd")
+var art = Art.new()
 const CELL = 20
 const KINDS = ["sprout", "beetle", "warden", "knight", "healer", "heart", "egg"]
 
@@ -43,7 +45,7 @@ func draw_surface(g) -> void:
 		if g.state == "arrival":
 			for i in range(2):
 				var walk_x = lerpf(gate_x - 180 - i * 48, gate_x - 20, minf(1, g.state_timer / 2.2))
-				g.draw_texture_rect_region(ACTORS, Rect2(walk_x, 95, 40, 40), Rect2((3+i)*CELL, (int(g.state_timer*6)%4)*CELL, CELL, CELL))
+				art.draw(g, "knight" if i == 0 else "healer", Vector2(walk_x+20,131),g.state_timer,"move")
 	if g.sim.heroes.is_empty():
 		plate(g, Rect2(12, 10, 250, 38))
 		g.text_at("深庭", Vector2(23, 36), 21, g.GOLD)
@@ -53,7 +55,7 @@ func draw_surface(g) -> void:
 			var h = g.sim.heroes[i]
 			var x = 12 + i * 241
 			plate(g, Rect2(x, 10, 231, 45))
-			g.draw_texture_rect_region(ACTORS, Rect2(x+5, 15, 32, 32), Rect2((3+i)*CELL, 0, CELL, CELL))
+			art.icon(g, h.kind, Vector2(x+22,48))
 			var name = "測量士" if h.kind == "knight" else "修道士"
 			name += "  撃破" if h.dead else ("  運搬中" if h.id == g.sim.carrier else "")
 			g.text_at(name, Vector2(x+42, 29), 12, g.RED if h.id == g.sim.carrier else g.INK)
@@ -101,14 +103,14 @@ func draw_dungeon(g) -> void:
 			g.draw_rect(Rect2(at+Vector2(9,y),Vector2(22,3)),Color("a3926e"))
 	for a in g.sim.creatures:
 		if not a.dead:
-			draw_actor(g,a.kind,a.pos,a.hp/a.max_hp,a.flash)
+			draw_actor(g,a.kind,a.pos,a.hp/a.max_hp,a.flash,1,g.visuals.key(a))
 	if g.sim.monarch.x >= 0:
 		draw_actor(g,"heart",g.sim.monarch,1,0)
 		if g.on_screen(g.sim.monarch):
 			g.draw_rect(Rect2(g.screen_pos(g.sim.monarch)+Vector2(14,1),Vector2(12,2)),g.GOLD)
 	for h in g.sim.heroes:
 		if not h.dead:
-			draw_actor(g,h.kind,h.pos,h.hp/h.max_hp,h.flash)
+			draw_actor(g,h.kind,h.pos,h.hp/h.max_hp,h.flash,1,g.visuals.key(h,true))
 			if g.on_screen(h.pos):
 				var at = g.screen_pos(h.pos)
 				g.draw_colored_polygon(PackedVector2Array([at+Vector2(15,1),at+Vector2(25,1),at+Vector2(20,6)]),g.RED)
@@ -126,10 +128,12 @@ func draw_dungeon(g) -> void:
 			g.draw_line(at+corner,at+corner+Vector2(dx,0),col,2)
 			g.draw_line(at+corner,at+corner+Vector2(0,dy),col,2)
 		if g.state != "placement":
+			at += Vector2(2,-3) if g.visuals.dig_kick > 0.12 else Vector2.ZERO
 			g.draw_line(at+Vector2(14,29),at+Vector2(26,13),Color("392d29"),6)
 			g.draw_line(at+Vector2(14,29),at+Vector2(26,13),Color("ca9360"),2)
 			g.draw_polyline(PackedVector2Array([at+Vector2(14,12),at+Vector2(21,9),at+Vector2(28,12),at+Vector2(32,18)]),Color("1e252a"),6)
 			g.draw_polyline(PackedVector2Array([at+Vector2(14,11),at+Vector2(21,8),at+Vector2(28,11),at+Vector2(32,17)]),Color("e0e9d5"),3)
+	g.visuals.draw(g)
 	for particle in g.particles:
 		var at: Vector2 = g.MAP.position + particle.pos - Vector2(g.camera*g.TILE)
 		if g.MAP.has_point(at): g.draw_rect(Rect2(at,Vector2(3,3)),g.GOLD)
@@ -147,13 +151,20 @@ func draw_wall_shadows(g, p: Vector2i) -> void:
 	if not g.sim.open_at(p+Vector2i.DOWN):
 		g.draw_rect(Rect2(at+Vector2(0,38),Vector2(40,2)),Color("5e5340"))
 
-func draw_actor(g, kind: String, p: Vector2i, ratio: float, flash: float, alpha: float = 1) -> void:
-	if not g.on_screen(p): return
-	var at = g.screen_pos(p)
-	var frame = int(g.animation*5+p.x*0.2+p.y*0.3)%4
-	if kind == "sprout":
-		g.draw_rect(Rect2(at+Vector2(4,10),Vector2(32,26)),Color(0.46,0.7,0.26,0.075*alpha))
-	g.draw_texture_rect_region(ACTORS,Rect2(at,Vector2(40,40)),Rect2(KINDS.find(kind)*CELL,frame*CELL,CELL,CELL),Color(1.4,1.4,1.4,alpha) if flash>0 else Color(1,1,1,alpha))
+func draw_actor(g, kind: String, p: Vector2i, ratio: float, flash: float, alpha: float = 1, id: String = "") -> void:
+	var world: Vector2 = g.visuals.position(id, Vector2(p))
+	if not g.on_screen(Vector2i(world.round())): return
+	var at: Vector2 = (g.MAP.position + (world-Vector2(g.camera))*g.TILE).round()
+	var pose: Dictionary = g.visuals.poses.get(id,{})
+	var moving = float(pose.get("elapsed",1)) < 0.18
+	var action = "move" if moving else "idle"
+	var bob: float = -2 if moving and sin(float(pose.elapsed)/0.18*PI)>0.4 else 0
+	if float(pose.get("until",0)) > g.visuals.clock:
+		action = str(pose.action)
+		if action == "attack": at += Vector2(pose.get("direction",Vector2.ZERO)) * 3
+	var tint = Color(1.8,1.5,1.3,alpha) if flash>0 else Color(1,1,1,alpha)
+	g.draw_rect(Rect2(at+Vector2(8,33),Vector2(24,4)),Color(0.02,0.03,0.04,0.45*alpha))
+	art.draw(g,kind,at+Vector2(20,36),g.animation,action,int(pose.get("face",1)),tint,bob)
 	if ratio < 0.97:
 		g.draw_rect(Rect2(at+Vector2(7,37),Vector2(26,2)),Color("162020"))
 		g.draw_rect(Rect2(at+Vector2(7,37),Vector2(floorf(26*clampf(ratio,0,1)),2)),g.RED if kind in ["knight","healer"] else g.GREEN)
@@ -169,7 +180,7 @@ func draw_hud(g) -> void:
 	var counts = g.sim.counts()
 	for i in range(3):
 		var x = 274+i*63
-		g.draw_texture_rect_region(ACTORS,Rect2(x,544,28,28),Rect2(i*CELL,0,CELL,CELL))
+		art.icon(g,KINDS[i],Vector2(x+14,570))
 		g.text_at(str(counts[KINDS[i]]),Vector2(x+31,567),15,g.GREEN)
 	var idx = g.sim.index(g.sim.cursor)
 	g.text_at("養分 %02d  魔分 %02d" % [g.sim.nutrients[idx],g.sim.mana[idx]],Vector2(486,563),13)

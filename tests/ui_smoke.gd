@@ -79,6 +79,7 @@ func run() -> void:
 		game.sim.hit_hero(h, 9999)
 	await create_timer(0.3).timeout
 	check(game.state == "won", "victory presentation")
+	await create_timer(0.85).timeout
 	await capture("victory")
 	await tap(JOY_BUTTON_A)
 	check(game.state == "prepare" and game.sim.dug == 0, "A retries from clean initial world")
@@ -88,6 +89,7 @@ func run() -> void:
 	game.state = "battle"
 	await create_timer(1.0).timeout
 	check(game.state == "lost", "defeat presentation")
+	await create_timer(0.85).timeout
 	await capture("defeat")
 	print("UI RESULT failures=%d" % failures)
 	game.queue_free()

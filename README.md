@@ -1,8 +1,10 @@
 # 深庭 — DEEPGARDEN
 
-Godot 4.7.2 / Windows向け、コントローラー対応の生態系ダンジョン防衛ゲーム。1面試作 v0.2（画面改修版）です。
+Godot 4.7.2 / Windows向け、コントローラー対応の生態系ダンジョン防衛ゲーム。1面試作 v0.3（素材差し替え・演出検証版）です。
 
-![ゲーム画面](docs/images/garden.png)
+![ゲーム画面](docs/images/v03/garden.png)
+
+自作の灯苔・戦士PNG、差し替えカタログ、イベントに連動する掘削・誕生・攻撃・撃破演出を追加しました。[素材の入れ替え方](docs/character-assets.md) / [品質検証の範囲と制限](docs/quality-v0.3.md)。
 
 土を掘り、灯苔 → 琥珀虫 → 石角という食物連鎖を育てて、2人の侵入者から「深庭の主」を守ります。捕縛されても、運搬者を出口までに倒せばその場で救出できます。
 
@@ -101,7 +103,7 @@ godot --headless --path . --export-release "Windows Desktop" ../Deepgarden-Windo
 
 ## 素材・ライセンス
 
-土・生物のドット絵はコードで描いた独自の図柄、効果音は合成音です。地上背景は組み込み画像生成ツールで作成しました。原作・Wikiの画像や音声は使用していません。土・生物のv0.2素材はPythonとPillowで再生成できます（`tools/build_pixel_art.py`）。旧素材・音声の生成元は`tools/make_assets.py`です。
+v0.3の灯苔と戦士はユーザー自作PNGです。土とその他の生物の仮絵はコードで描いた独自の図柄、効果音は合成音です。地上背景は組み込み画像生成ツールで作成しました。原作・Wikiの画像や音声は使用していません。土・生物のv0.2素材はPythonとPillowで再生成できます（`tools/build_pixel_art.py`）。旧素材・音声の生成元は`tools/make_assets.py`です。
 
 - Godot Engine：MIT。`assets/GODOT-LICENSE.txt`、`assets/GODOT-COPYRIGHT.txt`。
 - Noto Sans CJK JP：SIL Open Font License 1.1。`assets/FONT-LICENSE.txt`。

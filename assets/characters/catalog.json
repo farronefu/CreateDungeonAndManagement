@@ -1,0 +1,12 @@
+{
+  "sprout": {
+    "texture": "res://assets/characters/moss-microbe-32x32.png",
+    "cell": [32, 32], "anchor": [16, 24], "scale": 2,
+    "animations": {"idle": {"row": 0, "frames": 1, "fps": 5}}
+  },
+  "knight": {
+    "texture": "res://assets/characters/beginner-hero-32x32.png",
+    "cell": [32, 32], "anchor": [16, 31], "scale": 1,
+    "animations": {"idle": {"row": 0, "frames": 1, "fps": 6}}
+  }
+}

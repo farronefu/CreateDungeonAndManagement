@@ -33,6 +33,12 @@ var kills: int = 0
 var dug: int = 0
 var notice: String = "養分のある土を掘って、生き物を育てよう。"
 var events: Array = []
+var visual_events: Array = []
+
+func visual(type: String, pos: Vector2i, actor: String = "", direction: Vector2 = Vector2.ZERO) -> void:
+	if visual_events.size() >= 128: visual_events.pop_front()
+	visual_events.append({"type":type,"pos":pos,"actor":actor,"direction":direction})
+
 var nests: Array = []
 var bonus: Dictionary = {}
 var upgraded: Dictionary = {}
@@ -110,6 +116,7 @@ func spawn(kind: String, p: Vector2i, food: int, magic: int = 0) -> Dictionary:
 		"age": 0.0, "breed": 0.0, "flash": 0.0, "dead": false}
 	next_id += 1
 	creatures.append(a)
+	visual("birth", p, "m" + str(a.id))
 	return a
 
 func can_place(p: Vector2i) -> bool:
@@ -173,10 +180,12 @@ func remove_creature(a: Dictionary, eaten: bool = false) -> void:
 	if a.dead:
 		return
 	a.dead = true
+	visual("eat" if eaten else "death", a.pos)
 	if not eaten:
 		deposit(a.pos, a.food, a.mana)
 
 func hit_creature(a: Dictionary, amount: float) -> void:
+	visual("hit", a.pos)
 	a.hp -= amount
 	a.flash = 0.2
 	if a.hp <= 0:
@@ -185,10 +194,12 @@ func hit_creature(a: Dictionary, amount: float) -> void:
 func hit_hero(h: Dictionary, amount: float) -> void:
 	if h.dead:
 		return
+	visual("hit", h.pos)
 	h.hp -= maxf(1.0, amount - h.defense)
 	h.flash = 0.2
 	if h.hp <= 0:
 		h.dead = true
+		visual("hero_death", h.pos)
 		kills += 1
 		deposit(h.pos, 24, 8)
 		if carrier == h.id:
@@ -243,6 +254,7 @@ func creature_action(a: Dictionary, battle: bool) -> void:
 	if battle:
 		for h in heroes:
 			if not h.dead and distance(a.pos, h.pos) <= 1:
+				visual("attack", a.pos, "m" + str(a.id), Vector2(h.pos-a.pos))
 				hit_hero(h, STATS[a.kind].attack)
 				return
 	# Food chain: consumers incorporate prey energy; no free resource creation.
@@ -322,6 +334,7 @@ func hero_action(h: Dictionary) -> void:
 			return
 		for a in creatures:
 			if not a.dead and a.pos == h.pos:
+				visual("attack", h.pos, "h" + str(h.id), Vector2(a.pos-h.pos))
 				hit_creature(a, h.attack)
 				return
 		var route = path_between(h.pos, entrance)
@@ -342,10 +355,12 @@ func hero_action(h: Dictionary) -> void:
 				ally.hp = minf(ally.max_hp, ally.hp + 45)
 				h.mp -= 18
 				h.heal_cd = 5
+				visual("heal", ally.pos)
 				ally.flash = 0.3
 				return
 	for a in creatures:
 		if not a.dead and distance(h.pos, a.pos) <= 1:
+			visual("attack", h.pos, "h" + str(h.id), Vector2(a.pos-h.pos))
 			hit_creature(a, h.attack)
 			return
 	var options = neighbors(h.pos)
