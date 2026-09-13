@@ -8,6 +8,7 @@ var presentation = View.new()
 const Visuals = preload("res://scripts/action_visuals.gd")
 var visuals = Visuals.new()
 var result_elapsed: float = 0
+const RESULT_DELAY = 1.4
 const TILE = 40
 const VISIBLE = Vector2i(24, 10)
 const MAP = Rect2(0, 136, 960, 400)
@@ -112,7 +113,7 @@ func _process(delta: float) -> void:
 		visuals.update(delta)
 	elif state in ["won", "lost"]:
 		result_elapsed += delta
-		if result_elapsed < 0.8: visuals.update(delta)
+		visuals.update(minf(delta,maxf(0,RESULT_DELAY-(result_elapsed-delta))))
 	if state == "arrival":
 		state_timer += delta
 	if state == "arrival" and state_timer >= 2.2:
@@ -154,6 +155,9 @@ func advance_time(delta: float) -> void:
 			break
 		if not sim.outcome.is_empty():
 			state = sim.outcome
+			if state == "won" and not sim.heroes.is_empty():
+				view_target = "cursor"
+				center_camera(sim.heroes[-1].pos,true)
 			result_elapsed = 0
 			play_sound("win" if state == "won" else "alert")
 			break
@@ -187,7 +191,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				3: get_tree().quit()
 		return
 	if state == "title" or state in ["won", "lost"]:
-		if state in ["won", "lost"] and result_elapsed < 0.8:
+		if state in ["won", "lost"] and result_elapsed < RESULT_DELAY:
 			return
 		if event.is_action_pressed("confirm"):
 			restart()
@@ -200,6 +204,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("confirm"):
 			if sim.can_place(sim.cursor):
 				sim.start_battle(sim.cursor)
+				visuals.observe(sim)
+				view_target = "hero"
+				center_camera(sim.entrance,true)
 				state = "battle"
 				play_sound("alert")
 			else:
@@ -300,7 +307,7 @@ func _draw() -> void:
 	if state == "title": draw_title()
 	elif state == "paused": draw_pause()
 	elif state == "arrival": draw_arrival()
-	elif state in ["won", "lost"] and result_elapsed >= 0.8: draw_result()
+	elif state in ["won", "lost"] and result_elapsed >= RESULT_DELAY: draw_result()
 
 func screen_pos(p: Vector2i) -> Vector2:
 	return MAP.position + Vector2((p - camera) * TILE)
@@ -348,17 +355,16 @@ func draw_arrival() -> void:
 	draw_rect(Rect2(0,y,960,132),Color(0.07,0.09,0.11,0.94))
 	draw_rect(Rect2(0,y,960,2),RED)
 	draw_rect(Rect2(0,y+130,960,2),GOLD)
-	presentation.art.draw(self,"knight",Vector2(258,y+93),state_timer,"move")
-	presentation.art.draw(self,"healer",Vector2(308,y+93),state_timer,"move")
+	presentation.art.draw(self,"knight",Vector2(258,y+93),state_timer,"move_right")
 	text_at("侵入者、到来。",Vector2(363,y+53),29,GOLD)
-	text_at("鉄の測量士 ＋ 灯の修道士",Vector2(363,y+84),16)
+	text_at("鉄の測量士",Vector2(363,y+84),16)
 	text_at("このあと、主を守る場所を選びます。",Vector2(363,y+111),12,MUTED)
 
 func draw_result() -> void:
 	overlay(Rect2(215, 120, 530, 360))
 	text_at("庭は守られた。" if state == "won" else "主が連れ去られた。", Vector2(258, 183), 30, GREEN if state == "won" else RED)
 	text_at("生き残った生態系が、次の庭の力になる。" if state == "won" else "守り手を増やし、帰り道にも防衛を。", Vector2(258, 222), 14, MUTED)
-	text_at("撃破 %d / 2    救出 %d    掘削 %d マス" % [sim.kills, sim.rescued, sim.dug], Vector2(258, 269), 15)
+	text_at("撃破 %d / %d    救出 %d    掘削 %d マス" % [sim.kills, sim.heroes.size(), sim.rescued, sim.dug], Vector2(258, 269), 15)
 	if state == "won":
 		text_at("獲得報酬  残資源 +%d / 軍 +%d / 時間 +%d" % [sim.bonus.reserve, sim.bonus.army, sim.bonus.time], Vector2(258, 308), 14, GOLD)
 	else:

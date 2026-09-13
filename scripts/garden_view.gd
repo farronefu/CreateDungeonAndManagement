@@ -43,9 +43,9 @@ func draw_surface(g) -> void:
 		g.draw_rect(Rect2(gate_x-35, 101, 8, 3), Color("75904c"))
 		g.draw_rect(Rect2(gate_x+19, 114, 15, 3), Color("6e8244"))
 		if g.state == "arrival":
-			for i in range(2):
+			for i in range(1):
 				var walk_x = lerpf(gate_x - 180 - i * 48, gate_x - 20, minf(1, g.state_timer / 2.2))
-				art.draw(g, "knight" if i == 0 else "healer", Vector2(walk_x+20,131),g.state_timer,"move")
+				art.draw(g, "knight", Vector2(walk_x+20,131),g.state_timer,"move_right")
 	if g.sim.heroes.is_empty():
 		plate(g, Rect2(12, 10, 250, 38))
 		g.text_at("深庭", Vector2(23, 36), 21, g.GOLD)
@@ -105,14 +105,19 @@ func draw_dungeon(g) -> void:
 		if not a.dead:
 			draw_actor(g,a.kind,a.pos,a.hp/a.max_hp,a.flash,1,g.visuals.key(a))
 	if g.sim.monarch.x >= 0:
-		draw_actor(g,"heart",g.sim.monarch,1,0)
+		var carry_key = "h"+str(g.sim.carrier) if g.sim.carrier>=0 else ""
+		draw_actor(g,"heart",g.sim.monarch,1,0,1,carry_key)
 		if g.on_screen(g.sim.monarch):
-			g.draw_rect(Rect2(g.screen_pos(g.sim.monarch)+Vector2(14,1),Vector2(12,2)),g.GOLD)
+			var world = g.visuals.position(carry_key,Vector2(g.sim.monarch))
+			g.draw_rect(Rect2(g.MAP.position+(world-Vector2(g.camera))*g.TILE+Vector2(14,1),Vector2(12,2)),g.GOLD)
 	for h in g.sim.heroes:
-		if not h.dead:
-			draw_actor(g,h.kind,h.pos,h.hp/h.max_hp,h.flash,1,g.visuals.key(h,true))
+		if h.dead:
+			draw_hero_remains(g,h)
+		else:
+			draw_actor(g,h.kind,h.pos,h.hp/h.max_hp,h.flash,1,g.visuals.key(h,true),h)
 			if g.on_screen(h.pos):
-				var at = g.screen_pos(h.pos)
+				var world = g.visuals.position(g.visuals.key(h,true),Vector2(h.pos))
+				var at = (g.MAP.position+(world-Vector2(g.camera))*g.TILE).round()
 				g.draw_colored_polygon(PackedVector2Array([at+Vector2(15,1),at+Vector2(25,1),at+Vector2(20,6)]),g.RED)
 				if h.id == g.sim.carrier:
 					g.draw_rect(Rect2(at+Vector2(1,1),Vector2(38,38)),g.RED,false,2)
@@ -151,7 +156,7 @@ func draw_wall_shadows(g, p: Vector2i) -> void:
 	if not g.sim.open_at(p+Vector2i.DOWN):
 		g.draw_rect(Rect2(at+Vector2(0,38),Vector2(40,2)),Color("5e5340"))
 
-func draw_actor(g, kind: String, p: Vector2i, ratio: float, flash: float, alpha: float = 1, id: String = "") -> void:
+func draw_actor(g, kind: String, p: Vector2i, ratio: float, flash: float, alpha: float = 1, id: String = "", hero: Dictionary = {}) -> void:
 	var world: Vector2 = g.visuals.position(id, Vector2(p))
 	if not g.on_screen(Vector2i(world.round())): return
 	var at: Vector2 = (g.MAP.position + (world-Vector2(g.camera))*g.TILE).round()
@@ -162,9 +167,20 @@ func draw_actor(g, kind: String, p: Vector2i, ratio: float, flash: float, alpha:
 	if float(pose.get("until",0)) > g.visuals.clock:
 		action = str(pose.action)
 		if action == "attack": at += Vector2(pose.get("direction",Vector2.ZERO)) * 3
+	var clip_clock: float = g.animation
+	if not hero.is_empty():
+		var direction = "down"
+		if hero.heading.x < 0: direction = "left"
+		elif hero.heading.x > 0: direction = "right"
+		elif hero.heading.y < 0: direction = "up"
+		action = hero.motion
+		clip_clock = hero.motion_time + clampf(g.visuals.clock-float(pose.get("last_tick_clock",g.visuals.clock)),0,0.1)
+		if action in ["move","attack"]: action += "_" + direction
+		if hero.motion == "move" and hero.motion_left <= 0: clip_clock = 0
+		bob = 0
 	var tint = Color(1.8,1.5,1.3,alpha) if flash>0 else Color(1,1,1,alpha)
 	g.draw_rect(Rect2(at+Vector2(8,33),Vector2(24,4)),Color(0.02,0.03,0.04,0.45*alpha))
-	art.draw(g,kind,at+Vector2(20,36),g.animation,action,int(pose.get("face",1)),tint,bob)
+	art.draw(g,kind,at+Vector2(20,36),clip_clock,action,int(pose.get("face",1)),tint,bob)
 	if ratio < 0.97:
 		g.draw_rect(Rect2(at+Vector2(7,37),Vector2(26,2)),Color("162020"))
 		g.draw_rect(Rect2(at+Vector2(7,37),Vector2(floorf(26*clampf(ratio,0,1)),2)),g.RED if kind in ["knight","healer"] else g.GREEN)
@@ -195,3 +211,20 @@ func draw_hud(g) -> void:
 	elif g.sim.power <= 0:
 		hint = "掘削力が尽きました。魔物の防衛を見守ろう。  LB 追跡   Menu 停止"
 	g.text_at(hint,Vector2(14,594),11,g.INK)
+
+func draw_hero_remains(g, h: Dictionary) -> void:
+	if not g.on_screen(h.pos): return
+	var at = g.screen_pos(h.pos)
+	var age: float = g.visuals.poses.get(g.visuals.key(h,true),{}).get("death_age",0.0)
+	if age < 0.85:
+		art.draw(g,h.kind,at+Vector2(20,36),age,"death")
+	elif art.entries.get(h.kind,{}).get("animations",{}).has("bones"):
+		art.draw(g,h.kind,at+Vector2(20,36),0,"bones")
+	else:
+		# Temporary skull/bones, replaceable through the catalog's bones clip.
+		g.draw_line(at+Vector2(12,29),at+Vector2(27,34),Color("a09b83"),2)
+		g.draw_line(at+Vector2(12,34),at+Vector2(27,29),Color("d2cfb3"),2)
+		g.draw_rect(Rect2(at+Vector2(17,23),Vector2(8,7)),Color("ddd9bc"))
+		g.draw_rect(Rect2(at+Vector2(18,29),Vector2(6,2)),Color("b6b29a"))
+		g.draw_rect(Rect2(at+Vector2(18,25),Vector2(2,2)),Color("34383a"))
+		g.draw_rect(Rect2(at+Vector2(22,25),Vector2(2,2)),Color("34383a"))

@@ -122,7 +122,7 @@ func spawn(kind: String, p: Vector2i, food: int, magic: int = 0) -> Dictionary:
 func can_place(p: Vector2i) -> bool:
 	return open_at(p) and p != entrance and not path_between(entrance, p).is_empty()
 
-func start_battle(p: Vector2i, solo: bool = false) -> void:
+func start_battle(p: Vector2i, solo: bool = true) -> void:
 	monarch = p
 	heroes.clear()
 	carrier = -1
@@ -133,7 +133,9 @@ func start_battle(p: Vector2i, solo: bool = false) -> void:
 			"max_hp": 175.0 if i == 0 else 110.0, "mp": 72 if i == 1 else 0,
 			"attack": 14.0 if i == 0 else 9.0, "defense": 3.0 if i == 0 else 1.0,
 			"cooldown": i * 0.7, "heal_cd": 0.0, "visited": {},
-			"flash": 0.0, "dead": false})
+			"flash": 0.0, "dead": false, "motion":"celebrate", "motion_time":0.0,
+			"motion_left":0.7, "heading":Vector2i.DOWN, "previous":Vector2i(-1,-1),
+			"looked":Vector2i(-1,-1)})
 	notice = "侵入開始。守り手を残して、帰り道でも迎え撃とう。"
 
 func path_between(start: Vector2i, goal: Vector2i) -> Array:
@@ -229,11 +231,20 @@ func tick(dt: float, battle: bool) -> void:
 		for h in heroes:
 			if h.dead:
 				continue
+			h.motion_time += dt
+			h.motion_left = maxf(0,h.motion_left-dt)
+			if h.has("pending_hit") and h.motion_time >= 4.0/14.0:
+				for target in creatures:
+					if target.id == h.pending_hit and not target.dead and distance(h.pos,target.pos)<=1:
+						visual("attack",h.pos,"h"+str(h.id),Vector2(h.heading))
+						hit_creature(target,h.attack)
+						break
+				h.erase("pending_hit")
 			h.flash = maxf(0.0, h.flash - dt)
 			h.heal_cd -= dt
 			h.cooldown -= dt
-			if h.cooldown <= 0:
-				h.cooldown += 0.68 if h.kind == "knight" else 0.8
+			if h.cooldown <= 0 and h.motion_left <= 0:
+				h.cooldown = 0.68 if h.kind == "knight" else 0.8
 				hero_action(h)
 				if outcome == "lost":
 					break
@@ -327,25 +338,44 @@ func has_nest_space(p: Vector2i) -> bool:
 				return true
 	return false
 
+func set_hero_motion(h: Dictionary, motion: String, duration: float) -> void:
+	h.motion = motion
+	h.motion_time = 0.0
+	h.motion_left = duration
+
+func move_hero(h: Dictionary, destination: Vector2i) -> void:
+	h.previous = h.pos
+	h.heading = destination - h.pos
+	h.pos = destination
+	h.looked = Vector2i(-1,-1)
+	set_hero_motion(h,"move",0.25)
+
+func hero_attack(h: Dictionary, a: Dictionary) -> void:
+	var direction: Vector2i = a.pos-h.pos
+	if direction != Vector2i.ZERO: h.heading = direction
+	set_hero_motion(h,"attack",8.0/14.0)
+	h.pending_hit = a.id
+
 func hero_action(h: Dictionary) -> void:
+	if h.dead or h.motion_left > 0: return
 	if h.id == carrier:
 		if h.pos == entrance:
 			outcome = "lost"
 			return
 		for a in creatures:
 			if not a.dead and a.pos == h.pos:
-				visual("attack", h.pos, "h" + str(h.id), Vector2(a.pos-h.pos))
-				hit_creature(a, h.attack)
+				hero_attack(h,a)
 				return
 		var route = path_between(h.pos, entrance)
 		if route.size() > 1:
-			h.pos = route[1]
+			move_hero(h,route[1])
 			monarch = h.pos
 		if h.pos == entrance:
 			outcome = "lost"
 		return
 	if carrier < 0 and h.pos == monarch:
 		carrier = h.id
+		set_hero_motion(h,"celebrate",0.7)
 		notice = "捕縛！ LBで追跡。出口に着く前に運搬者を倒そう。"
 		events.append("capture")
 		return
@@ -360,11 +390,17 @@ func hero_action(h: Dictionary) -> void:
 				return
 	for a in creatures:
 		if not a.dead and distance(h.pos, a.pos) <= 1:
-			visual("attack", h.pos, "h" + str(h.id), Vector2(a.pos-h.pos))
-			hit_creature(a, h.attack)
+			hero_attack(h,a)
 			return
 	var options = neighbors(h.pos)
 	if options.is_empty():
+		return
+	# On entry to a fork, exclude the tile we came from. Look once, then choose.
+	var forward = options.filter(func(p): return p != h.previous)
+	if forward.size() >= 2 and h.looked != h.pos:
+		h.looked = h.pos
+		set_hero_motion(h,"look",0.6)
+		h.cooldown = 0.6
 		return
 	h.visited[h.pos] = h.visited.get(h.pos, 0) + 1
 	var target: Vector2i = options[0]
@@ -373,7 +409,7 @@ func hero_action(h: Dictionary) -> void:
 	if carrier < 0 and distance(h.pos, monarch) <= 6:
 		var route = path_between(h.pos, monarch)
 		if route.size() > 1:
-			h.pos = route[1]
+			move_hero(h,route[1])
 			return
 	if h.kind == "healer":
 		options.reverse()
@@ -382,7 +418,7 @@ func hero_action(h: Dictionary) -> void:
 		if value < score:
 			score = value
 			target = p
-	h.pos = target
+	move_hero(h,target)
 
 func army_power() -> int:
 	var total = 0

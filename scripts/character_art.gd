@@ -31,10 +31,12 @@ func draw(g, kind: String, feet: Vector2, clock: float, action: String = "idle",
 		anchor = Vector2(item.anchor[0], item.anchor[1]) * scale_value
 		var clips = item.get("animations", {})
 		var clip = clips.get(action, clips.get("idle", {"row":0,"frames":1,"fps":5}))
-		var frame = int(clock * float(clip.get("fps", 5))) % maxi(1, int(clip.get("frames", 1)))
+		var count = maxi(1, int(clip.get("frames", 1)))
+		var frame = maxi(0,int(clock * float(clip.get("fps", 5))))
+		frame = frame % count if clip.get("loop",true) else mini(frame,count-1)
 		source = Rect2(Vector2(frame, int(clip.get("row", 0))) * cell, cell)
 	var rect = Rect2((feet - anchor * display_scale + Vector2(0, bob)).round(), size * display_scale)
-	if facing < 0:
+	if facing < 0 and entries.get(kind,{}).get("mirror",true):
 		rect.position.x += rect.size.x
 		rect.size.x = -rect.size.x
 	g.draw_texture_rect_region(texture, rect, source, tint)

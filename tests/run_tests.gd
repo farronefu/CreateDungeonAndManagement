@@ -59,24 +59,34 @@ func run() -> void:
 	check(egg.kind == "warden", "egg grows into defender")
 
 	s = corridor()
-	s.start_battle(Vector2i(30, 12))
+	s.start_battle(Vector2i(30, 12), false)
 	check(s.heroes.size() == 2, "two-person invasion")
 	s.heroes[0].hp = 30
+	s.heroes[0].motion_left = 0
+	if s.heroes.size()>1: s.heroes[1].motion_left = 0
 	s.hero_action(s.heroes[1])
 	check(s.heroes[0].hp == 75 and s.heroes[1].mp == 54, "healer uses MP to heal low-HP ally")
 	s.heroes[0].pos = s.monarch
+	s.heroes[0].motion_left = 0
+	if s.heroes.size()>1: s.heroes[1].motion_left = 0
 	s.hero_action(s.heroes[0])
 	check(s.carrier == 0, "invader captures monarch")
+	s.heroes[0].motion_left = 0
+	if s.heroes.size()>1: s.heroes[1].motion_left = 0
 	s.hero_action(s.heroes[0])
 	check(s.heroes[0].pos == Vector2i(30, 11) and s.monarch == s.heroes[0].pos, "carrier heads to exit along shortest path")
 	var liberation = s.heroes[0].pos
 	s.hit_hero(s.heroes[0], 9999)
 	check(s.carrier == -1 and s.monarch == liberation and s.rescued == 1, "carrier death liberates monarch in place")
 	s.heroes[1].pos = s.monarch
+	s.heroes[0].motion_left = 0
+	if s.heroes.size()>1: s.heroes[1].motion_left = 0
 	s.hero_action(s.heroes[1])
 	check(s.carrier == 1, "remaining invader can recapture")
 	var previous_mp = s.heroes[1].mp
 	s.heroes[1].hp = 10
+	s.heroes[0].motion_left = 0
+	if s.heroes.size()>1: s.heroes[1].motion_left = 0
 	s.hero_action(s.heroes[1])
 	check(s.heroes[1].mp == previous_mp, "carrier cannot use healing skill")
 	s.hit_hero(s.heroes[1], 9999)
@@ -90,8 +100,10 @@ func run() -> void:
 	s = corridor()
 	s.start_battle(Vector2i(30, 8), true)
 	s.heroes[0].pos = s.monarch
+	s.heroes[0].motion_left = 0
+	if s.heroes.size()>1: s.heroes[1].motion_left = 0
 	s.hero_action(s.heroes[0])
-	for i in range(10): s.hero_action(s.heroes[0])
+	for i in range(100): s.tick(0.1,true)
 	check(s.outcome == "lost", "carrier reaching exit gives defeat")
 
 	var game = Game.new()
@@ -130,7 +142,7 @@ func run() -> void:
 	game.move_cursor(Vector2i.DOWN)
 	Input.action_release("dig")
 	check(game.sim.dug == 3 and game.sim.power == 157, "held X plus direction digs once per new tile")
-	game.sim.start_battle(Vector2i(30, 6))
+	game.sim.start_battle(Vector2i(30, 6), false)
 	var old_cursor = game.sim.cursor
 	game.toggle_focus()
 	check(game.view_target == "hero", "LB first selects invader")

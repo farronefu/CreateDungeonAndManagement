@@ -1,7 +1,7 @@
 extends SceneTree
 const Game = preload("res://scripts/game.gd")
 var g
-var folder = "res://docs/images/v03/"
+var folder = "res://docs/images/v04/"
 func _initialize() -> void:
 	call_deferred("run")
 func capture(name: String) -> void:
@@ -41,7 +41,9 @@ func run() -> void:
 	g.sim.heroes[0].pos=Vector2i(31,7)
 	g.state="battle"
 	g.visuals.observe(g.sim)
+	g.sim.heroes[0].motion_left=0
 	g.sim.hero_action(g.sim.heroes[0])
+	g.advance_time(0.3)
 	g.visuals.observe(g.sim)
 	g.visuals.update(0.06)
 	await capture("quality-hit")
@@ -49,7 +51,7 @@ func run() -> void:
 	g.advance_time(0.1)
 	g.visuals.update(0.1)
 	await capture("quality-death")
-	g._process(1)
+	g._process(2)
 	await capture("quality-result")
 	print("QUALITY captures complete")
 	g.queue_free()

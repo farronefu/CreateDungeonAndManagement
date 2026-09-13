@@ -18,13 +18,18 @@ func observe(sim) -> void:
 	var alive: Dictionary = {}
 	for group in [sim.creatures, sim.heroes]:
 		for a in group:
-			if a.dead: continue
+			if a.dead and group != sim.heroes: continue
 			var id = key(a, group == sim.heroes)
 			alive[id] = true
 			var target = Vector2(a.pos)
 			if not poses.has(id):
 				poses[id] = {"from":target,"to":target,"elapsed":1.0,"face":1,"action":"idle","until":0.0}
 			var pose = poses[id]
+			if group == sim.heroes: pose.last_tick_clock = clock
+			if a.dead and not pose.has("death_age"):
+				pose.death_age = 0.0
+				pose.from = target
+				pose.to = target
 			if pose.to != target:
 				pose.from = position(id, target)
 				pose.elapsed = 0.0
@@ -57,7 +62,9 @@ func emit(type: String, pos: Vector2, direction: Vector2 = Vector2.ZERO) -> void
 func update(dt: float) -> void:
 	clock += dt
 	dig_kick = maxf(0, dig_kick - dt)
-	for pose in poses.values(): pose.elapsed += dt
+	for pose in poses.values():
+		pose.elapsed += dt
+		if pose.has("death_age"): pose.death_age += dt
 	for effect in effects: effect.age += dt
 	effects = effects.filter(func(e): return e.age < e.duration)
 
