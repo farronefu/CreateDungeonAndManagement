@@ -20,16 +20,16 @@
     "icon_scale": 0.5
   },
   "knight": {
-    "texture": "res://assets/characters/hero-walk-4dir-8frames.png",
+    "texture": "res://assets/characters/hero-walk-nocape-40-v1.png",
     "cell": [
-      192,
-      256
+      40,
+      40
     ],
     "anchor": [
-      96,
-      236
+      20,
+      38
     ],
-    "scale": 0.2,
+    "scale": 1.25,
     "icon_scale": 0.6666666666666666,
     "marker_y": -14,
     "mirror": false,
@@ -115,10 +115,10 @@
           1254
         ],
         "anchor": [
-          625,
-          1114
+          588,
+          1129
         ],
-        "scale": 0.0457516339869281,
+        "scale": 0.043795620437956206,
         "row": 0,
         "frames": 1,
         "fps": 1

@@ -89,12 +89,12 @@ func run() -> void:
 	var clips=g.presentation.art.entries.knight.animations
 	var art=g.presentation.art
 	check(clips.look.placeholder and clips.death.placeholder and clips.celebrate.placeholder,"unfinished poses are explicitly temporary")
-	check(art.textures.knight.get_size()==Vector2(1536,1024),"new blue hero walk sheet loaded")
+	check(art.textures.knight.get_size()==Vector2(320,160),"new blue hero walk sheet loaded")
 	check(art.clip_textures[clips.portrait.texture].get_size()==Vector2(1254,1254),"new hero portrait loaded")
 	check(clips.attack_down.row==0 and clips.attack_up.row==1 and clips.attack_left.row==2 and clips.attack_right.row==3,"temporary attacks face correct directions")
 	check(clips.move_down.frames==8 and clips.move_up.frames==8 and clips.move_left.frames==8 and clips.move_right.frames==8,"all four walks retain eight frames")
 	check(is_equal_approx(art.scale_for("knight","attack_down"),art.scale_for("knight","move_down")),"temporary attack preserves body scale")
-	check(is_equal_approx(art.scale_for("knight","move_down")*210,42),"new hero stays slightly taller than 40px tile")
+	check(is_equal_approx(art.scale_for("knight","move_down")*34,42.5),"new hero stays slightly taller than 40px tile")
 
 	g.restart()
 	g.sim=room()
