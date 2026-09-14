@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://crfuhre7rvrj0"
-path="res://.godot/imported/hero-walk-nocape-40-v1.png-50dad7c15fcadbe49a9688505db35b38.ctex"
+uid="uid://bogiynxnjf4m3"
+path="res://.godot/imported/victory.png-b861677fec1a0c2b42a5198f402dde20.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/hero-walk-nocape-40-v1.png"
-dest_files=["res://.godot/imported/hero-walk-nocape-40-v1.png-50dad7c15fcadbe49a9688505db35b38.ctex"]
+source_file="res://docs/images/v054/victory.png"
+dest_files=["res://.godot/imported/victory.png-b861677fec1a0c2b42a5198f402dde20.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cgibpd2yiqgk4"
-path="res://.godot/imported/hero-attack-nocape-60-v3.png-aca9bcf3cf85ca13ed3fed05771be6d3.ctex"
+uid="uid://bgkwqcv4oq05c"
+path="res://.godot/imported/arrival.png-37f6982ab6d2c2c0129051a3ac88a475.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/hero-attack-nocape-60-v3.png"
-dest_files=["res://.godot/imported/hero-attack-nocape-60-v3.png-aca9bcf3cf85ca13ed3fed05771be6d3.ctex"]
+source_file="res://docs/images/v054/arrival.png"
+dest_files=["res://.godot/imported/arrival.png-37f6982ab6d2c2c0129051a3ac88a475.ctex"]
 
 [params]
 

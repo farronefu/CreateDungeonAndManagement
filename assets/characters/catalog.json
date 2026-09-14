@@ -20,16 +20,16 @@
     "icon_scale": 0.5
   },
   "knight": {
-    "texture": "res://assets/characters/hero-walk-nocape-40-v1.png",
+    "texture": "res://assets/characters/hero-walk-body42-cell48-v1.png",
     "cell": [
-      40,
-      40
+      48,
+      48
     ],
     "anchor": [
-      20,
-      38
+      24,
+      46
     ],
-    "scale": 1.25,
+    "scale": 1,
     "icon_scale": 0.6666666666666666,
     "marker_y": -14,
     "mirror": false,
@@ -45,14 +45,14 @@
         "fps": 8
       },
       "attack_down": {
-        "texture": "res://assets/characters/hero-attack-nocape-60-v3.png",
+        "texture": "res://assets/characters/hero-attack-body42-cell72-v1.png",
         "cell": [
-          60,
-          60
+          72,
+          72
         ],
         "anchor": [
-          30,
-          48
+          36,
+          58
         ],
         "scale": 1,
         "row": 0,
@@ -66,14 +66,14 @@
         "fps": 8
       },
       "attack_up": {
-        "texture": "res://assets/characters/hero-attack-nocape-60-v3.png",
+        "texture": "res://assets/characters/hero-attack-body42-cell72-v1.png",
         "cell": [
-          60,
-          60
+          72,
+          72
         ],
         "anchor": [
-          30,
-          48
+          36,
+          58
         ],
         "scale": 1,
         "row": 1,
@@ -87,14 +87,14 @@
         "fps": 8
       },
       "attack_left": {
-        "texture": "res://assets/characters/hero-attack-nocape-60-v3.png",
+        "texture": "res://assets/characters/hero-attack-body42-cell72-v1.png",
         "cell": [
-          60,
-          60
+          72,
+          72
         ],
         "anchor": [
-          30,
-          48
+          36,
+          58
         ],
         "scale": 1,
         "row": 2,
@@ -108,14 +108,14 @@
         "fps": 8
       },
       "attack_right": {
-        "texture": "res://assets/characters/hero-attack-nocape-60-v3.png",
+        "texture": "res://assets/characters/hero-attack-body42-cell72-v1.png",
         "cell": [
-          60,
-          60
+          72,
+          72
         ],
         "anchor": [
-          30,
-          48
+          36,
+          58
         ],
         "scale": 1,
         "row": 3,
