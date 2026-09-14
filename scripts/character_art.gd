@@ -52,9 +52,13 @@ func draw(g, kind: String, feet: Vector2, clock: float, action: String = "idle",
 		source = Rect2(Vector2(frame, int(clip.get("row", 0))) * cell, cell)
 	var rect = Rect2((feet - anchor * display_scale + Vector2(0, bob)).round(), size * display_scale)
 	if facing < 0 and entries.get(kind,{}).get("mirror",true):
-		rect.position.x += rect.size.x
-		rect.size.x = -rect.size.x
-	g.draw_texture_rect_region(texture, rect, source, tint)
+		# Negative region destination widths can clip/displace the sprite in GL.
+		# Mirror about the feet with a canvas transform; keep the region positive.
+		g.draw_set_transform(feet, 0, Vector2(-1,1))
+		g.draw_texture_rect_region(texture, Rect2(rect.position-feet,rect.size), source, tint)
+		g.draw_set_transform(Vector2.ZERO)
+	else:
+		g.draw_texture_rect_region(texture, rect, source, tint)
 
 func icon(g, kind: String, feet: Vector2) -> void:
 	var item = entries.get(kind,{})
