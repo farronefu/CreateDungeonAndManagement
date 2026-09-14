@@ -87,14 +87,15 @@ func run() -> void:
 	g._process(1.0)
 	check(snapshot==g.sim.snapshot(),"pause freezes hero animation state")
 	var clips=g.presentation.art.entries.knight.animations
-	check(clips.look.row==4 and clips.death.frames==5 and clips.celebrate.frames==7,"sheet rows and nonempty frame counts")
 	var art=g.presentation.art
-	check(art.clip_textures[clips.attack_down.texture].get_size()==Vector2(384,192),"wide attack sheet loaded")
-	check(Vector2(clips.attack_down.cell[0],clips.attack_down.cell[1])==Vector2(48,48) and Vector2(clips.attack_down.anchor[0],clips.attack_down.anchor[1])==Vector2(24,38),"attack uses separate cell size and grounded anchor")
-	check(clips.attack_down.row==0 and clips.attack_up.row==1 and clips.attack_left.row==2 and clips.attack_right.row==3,"attack sheet direction rows")
-	check(is_equal_approx(art.scale_for("knight","attack_down",0),1.5),"attack begins at normal scale")
-	check(is_equal_approx(art.scale_for("knight","attack_down",4.0/14),1.5),"attack contact keeps normal scale")
-	check(is_equal_approx(art.scale_for("knight","attack_down",1),1.5),"attack recovers normal scale")
+	check(clips.look.placeholder and clips.death.placeholder and clips.celebrate.placeholder,"unfinished poses are explicitly temporary")
+	check(art.textures.knight.get_size()==Vector2(1536,1024),"new blue hero walk sheet loaded")
+	check(art.clip_textures[clips.portrait.texture].get_size()==Vector2(1254,1254),"new hero portrait loaded")
+	check(clips.attack_down.row==0 and clips.attack_up.row==1 and clips.attack_left.row==2 and clips.attack_right.row==3,"temporary attacks face correct directions")
+	check(clips.move_down.frames==8 and clips.move_up.frames==8 and clips.move_left.frames==8 and clips.move_right.frames==8,"all four walks retain eight frames")
+	check(is_equal_approx(art.scale_for("knight","attack_down"),art.scale_for("knight","move_down")),"temporary attack preserves body scale")
+	check(is_equal_approx(art.scale_for("knight","move_down")*210,42),"new hero stays slightly taller than 40px tile")
+
 	g.restart()
 	g.sim=room()
 	g.state="battle"

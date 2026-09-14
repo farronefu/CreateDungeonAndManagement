@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bjenivp8x7sge"
-path="res://.godot/imported/hero-attack-wide-48.png-8c9dab7c7fbef7e48e655886bfb01e0c.ctex"
+uid="uid://dorymwuyfjrva"
+path="res://.godot/imported/arrival.png-7f1e3d2fc40df0f9bbe54820cf6ab37a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/hero-attack-wide-48.png"
-dest_files=["res://.godot/imported/hero-attack-wide-48.png-8c9dab7c7fbef7e48e655886bfb01e0c.ctex"]
+source_file="res://docs/images/v05/arrival.png"
+dest_files=["res://.godot/imported/arrival.png-7f1e3d2fc40df0f9bbe54820cf6ab37a.ctex"]
 
 [params]
 

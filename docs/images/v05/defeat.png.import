@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7spdwaqmff2l"
-path="res://.godot/imported/hero-attack-impact.png-ab36ef44c735d2c695a7bf0e3ba31887.ctex"
+uid="uid://y2n26yati2fq"
+path="res://.godot/imported/defeat.png-a934826938415079855336f886773c6f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/hero-attack-impact.png"
-dest_files=["res://.godot/imported/hero-attack-impact.png-ab36ef44c735d2c695a7bf0e3ba31887.ctex"]
+source_file="res://docs/images/v05/defeat.png"
+dest_files=["res://.godot/imported/defeat.png-a934826938415079855336f886773c6f.ctex"]
 
 [params]
 

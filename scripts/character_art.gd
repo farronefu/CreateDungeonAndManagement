@@ -27,13 +27,8 @@ func clip_for(kind: String, action: String) -> Dictionary:
 	var clips = entries.get(kind,{}).get("animations",{})
 	return clips.get(action,clips.get("idle",{"row":0,"frames":1,"fps":5}))
 
-func scale_for(kind: String, action: String, clock: float) -> float:
-	var base = float(entries.get(kind,{}).get("scale",1))
-	var clip = clip_for(kind,action)
-	var peak = float(clip.get("scale",base))
-	if peak == base: return base
-	var duration = float(clip.get("frames",1))/maxf(1,float(clip.get("fps",1)))
-	return lerpf(base,peak,sin(PI*clampf(clock/duration,0,1)))
+func scale_for(kind: String, action: String) -> float:
+	return float(clip_for(kind,action).get("scale",entries.get(kind,{}).get("scale",1)))
 
 func draw(g, kind: String, feet: Vector2, clock: float, action: String = "idle", facing: int = 1, tint: Color = Color.WHITE, bob: float = 0, display_scale: float = 1) -> void:
 	var texture: Texture2D = FALLBACK
@@ -47,7 +42,7 @@ func draw(g, kind: String, feet: Vector2, clock: float, action: String = "idle",
 		var cell_values = clip.get("cell",item.cell)
 		var anchor_values = clip.get("anchor",item.anchor)
 		var cell = Vector2(cell_values[0], cell_values[1])
-		var scale_value = scale_for(kind,action,clock)
+		var scale_value = scale_for(kind,action)
 		size = cell * scale_value
 		anchor = Vector2(anchor_values[0], anchor_values[1]) * scale_value
 		texture = clip_textures.get(str(clip.get("texture","")),texture)
@@ -62,5 +57,6 @@ func draw(g, kind: String, feet: Vector2, clock: float, action: String = "idle",
 	g.draw_texture_rect_region(texture, rect, source, tint)
 
 func icon(g, kind: String, feet: Vector2) -> void:
-	var multiplier = 1.0 / float(entries[kind].get("scale",1)) if entries.has(kind) else 0.5
-	draw(g,kind,feet,0,"idle",1,Color.WHITE,0,multiplier)
+	var item = entries.get(kind,{})
+	var action = "portrait" if item.get("animations",{}).has("portrait") else "idle"
+	draw(g,kind,feet,0,action,1,Color.WHITE,0,float(item.get("icon_scale",0.5)))

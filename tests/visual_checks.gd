@@ -13,7 +13,7 @@ func run() -> void:
 	g.set_process(false)
 	g.restart()
 	check(g.presentation.art.entries.has("sprout") and g.presentation.art.entries.has("knight"),"user art catalog loads")
-	check(g.presentation.art.textures.knight.get_size() == Vector2(256,352),"hero sheet size preserved")
+	check(g.presentation.art.textures.knight.get_size() == Vector2(1536,1024),"hero sheet size preserved")
 	var a = g.sim.spawn("sprout",Vector2i(30,2),5)
 	g.visuals.observe(g.sim)
 	var id = g.visuals.key(a)

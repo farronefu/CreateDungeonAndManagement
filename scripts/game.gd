@@ -2,7 +2,6 @@ extends Node2D
 
 const Sim = preload("res://scripts/simulation.gd")
 const FONT = preload("res://assets/NotoSansJP.otf")
-const ACTORS = preload("res://assets/actors-v2.png")
 const View = preload("res://scripts/garden_view.gd")
 var presentation = View.new()
 const Visuals = preload("res://scripts/action_visuals.gd")
@@ -32,10 +31,8 @@ var animation: float = 0.0
 var held_direction = Vector2i.ZERO
 var repeat_timer: float = 0.0
 var pause_choice: int = 0
-var screenshot_mode: bool = false
 var sounds: Dictionary = {}
 var sound_player: AudioStreamPlayer
-var particles: Array = []
 var control_name: String = "コントローラー未接続 / キーボード使用可"
 var muted: bool = false
 
@@ -53,7 +50,6 @@ func _ready() -> void:
 	if OS.get_cmdline_user_args().has("--preview"):
 		preview_scene()
 	if OS.get_cmdline_user_args().has("--screenshot"):
-		screenshot_mode = true
 		preview_scene()
 		await get_tree().process_frame
 		await get_tree().process_frame
@@ -102,7 +98,6 @@ func restart() -> void:
 	view_target = "cursor"
 	lb_next_hero = true
 	held_direction = Vector2i.ZERO
-	particles.clear()
 	visuals.reset()
 	result_elapsed = 0
 	play_sound("confirm")
@@ -132,11 +127,6 @@ func _process(delta: float) -> void:
 				repeat_timer += 0.1
 				move_cursor(direction)
 	advance_time(delta)
-	if state in RUNNING_STATES:
-		for particle in particles:
-			particle.life -= delta
-			particle.pos += particle.velocity * delta
-	particles = particles.filter(func(p): return p.life > 0)
 	queue_redraw()
 
 func advance_time(delta: float) -> void:
@@ -307,9 +297,6 @@ func screen_pos(p: Vector2i) -> Vector2:
 
 func on_screen(p: Vector2i) -> bool:
 	return p.x >= camera.x and p.x < camera.x + VISIBLE.x and p.y >= camera.y and p.y < camera.y + VISIBLE.y
-
-func draw_actor(kind: String, p: Vector2i, ratio: float, flash: float, alpha: float = 1.0) -> void:
-	presentation.draw_actor(self, kind, p, ratio, flash, alpha)
 
 func overlay(rect: Rect2) -> void:
 	draw_rect(Rect2(0, 0, 960, 600), Color(0.015, 0.035, 0.045, 0.72))

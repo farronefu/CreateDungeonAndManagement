@@ -3,7 +3,6 @@ extends RefCounted
 
 const SURFACE = preload("res://assets/surface-v2.png")
 const TERRAIN = preload("res://assets/terrain-v2.png")
-const ACTORS = preload("res://assets/actors-v2.png")
 const Art = preload("res://scripts/character_art.gd")
 var art = Art.new()
 const CELL = 20
@@ -118,11 +117,7 @@ func draw_dungeon(g) -> void:
 			if g.on_screen(h.pos):
 				var world = g.visuals.position(g.visuals.key(h,true),Vector2(h.pos))
 				var at = (g.MAP.position+(world-Vector2(g.camera))*g.TILE).round()
-				var direction = "up" if h.heading.y<0 else ("left" if h.heading.x<0 else ("right" if h.heading.x>0 else "down"))
-				var motion = h.motion+"_"+direction if h.motion in ["move","attack"] else h.motion
-				var pose = g.visuals.poses.get(g.visuals.key(h,true),{})
-				var clock = h.motion_time+clampf(g.visuals.clock-float(pose.get("last_tick_clock",g.visuals.clock)),0,0.1)
-				var marker_y = 1 - 32 * maxf(0,art.scale_for(h.kind,motion,clock)-1)
+				var marker_y = float(art.entries.get(h.kind,{}).get("marker_y",1))
 				g.draw_colored_polygon(PackedVector2Array([at+Vector2(15,marker_y),at+Vector2(25,marker_y),at+Vector2(20,marker_y+5)]),g.RED)
 				if h.id == g.sim.carrier:
 					g.draw_rect(Rect2(at+Vector2(1,1),Vector2(38,38)),g.RED,false,2)
@@ -144,9 +139,6 @@ func draw_dungeon(g) -> void:
 			g.draw_polyline(PackedVector2Array([at+Vector2(14,12),at+Vector2(21,9),at+Vector2(28,12),at+Vector2(32,18)]),Color("1e252a"),6)
 			g.draw_polyline(PackedVector2Array([at+Vector2(14,11),at+Vector2(21,8),at+Vector2(28,11),at+Vector2(32,17)]),Color("e0e9d5"),3)
 	g.visuals.draw(g)
-	for particle in g.particles:
-		var at: Vector2 = g.MAP.position + particle.pos - Vector2(g.camera*g.TILE)
-		if g.MAP.has_point(at): g.draw_rect(Rect2(at,Vector2(3,3)),g.GOLD)
 	g.draw_line(Vector2(0,136),Vector2(960,136),Color("1b211f"),2)
 
 func draw_wall_shadows(g, p: Vector2i) -> void:
@@ -222,7 +214,8 @@ func draw_hero_remains(g, h: Dictionary) -> void:
 	var at = g.screen_pos(h.pos)
 	var age: float = g.visuals.poses.get(g.visuals.key(h,true),{}).get("death_age",0.0)
 	if age < 0.85:
-		art.draw(g,h.kind,at+Vector2(20,36),age,"death")
+		var fade = 1.0-age/0.85 if art.clip_for(h.kind,"death").get("placeholder",false) else 1.0
+		art.draw(g,h.kind,at+Vector2(20,36),age,"death",1,Color(1,1,1,fade))
 	elif art.entries.get(h.kind,{}).get("animations",{}).has("bones"):
 		art.draw(g,h.kind,at+Vector2(20,36),0,"bones")
 	else:

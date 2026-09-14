@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://quet3eetjfog"
-path="res://.godot/imported/hero-walk-4directions.png-bcf7d0c69e9f86652d3d14ad90f05ebe.ctex"
+uid="uid://dwe2cgdjor1qi"
+path="res://.godot/imported/title.png-4bb5da088e5114e03bc20d43cc69dc99.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/characters/hero-walk-4directions.png"
-dest_files=["res://.godot/imported/hero-walk-4directions.png-bcf7d0c69e9f86652d3d14ad90f05ebe.ctex"]
+source_file="res://docs/images/v05/title.png"
+dest_files=["res://.godot/imported/title.png-4bb5da088e5114e03bc20d43cc69dc99.ctex"]
 
 [params]
 
